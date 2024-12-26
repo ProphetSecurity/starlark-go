@@ -515,6 +515,8 @@ func AsFloat(x Value) (f float64, ok bool) {
 		return float64(x), true
 	case Int:
 		return float64(x.Float()), true
+	case interface{ AsFloat() (float64, bool) }:
+		return x.AsFloat()
 	}
 	return 0, false
 }
@@ -589,7 +591,15 @@ func (x String) CompareSameType(op syntax.Token, y_ Value, depth int) (bool, err
 	return threeway(op, strings.Compare(string(x), string(y))), nil
 }
 
-func AsString(x Value) (string, bool) { v, ok := x.(String); return string(v), ok }
+func AsString(x Value) (string, bool) {
+	switch x := x.(type) {
+	case String:
+		return string(x), true
+	case interface{ AsString() (string, bool) }:
+		return x.AsString()
+	}
+	return "", false
+}
 
 // A stringElems is an iterable whose iterator yields a sequence of
 // elements (bytes), either numerically or as successive substrings.
